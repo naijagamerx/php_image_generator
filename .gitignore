@@ -1,0 +1,53 @@
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Environment configuration and sensitive data
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Compiled output
+/dist/
+/build/
+
+# Cache and temporary files
+/cache/
+/temp/
+*.tmp
+
+# API keys and credentials
+kaggle.json
+
+# User-generated images and content
+/user_uploads/
+/generated_images/
+
+# Debug files
+error_log
+debug.log
+
+# Local configuration files
+config.local.php
