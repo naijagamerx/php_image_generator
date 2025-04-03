@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Library - AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .page-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0.5rem;
+        }
+        
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .main-container {
+            padding: 0.75rem;
+        }
+        
+        @media (min-width: 640px) {
+            .main-container {
+                padding: 1rem;
+            }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            display: flex;
+            flex-direction: column;
+            min-height: fit-content;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 0.75rem;
+            }
+        }
+        
+        /* Adjust image card height for better fit */
+        .image-card img {
+            height: 160px !important;
+        }
+        
+        /* Optimize header spacing */
+        .header-section {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        
+        /* Optimize search and control elements */
+        .mb-6 {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* More compact modal */
+        .modal-content {
+            max-width: 80%;
+        }
+        
+        @media (max-width: 768px) {
+            .image-actions {
+                opacity: 1;
+                padding: 1.5rem 0.5rem 0.5rem;
+            }
+        }
+        
+        .action-btn {
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modal-appear 0.3s ease-out;
+        }
+        
+        @keyframes modal-appear {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            font-weight: 500;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            color: #3b82f6;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .prompt-container {
+            position: relative;
+        }
+        
+        .prompt-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .date-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: auto;
+        }
+        
+        .footer a {
+            color: #4f46e5;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="p-0 sm:p-0">
+    <div class="page-container">
+        <div class="content-wrapper">
+            <div class="glass-card rounded-2xl shadow-xl main-container">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 header-section">
+                    <div class="mb-4 md:mb-0 text-center md:text-left">
+                        <h1 class="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 inline-block mb-2">Image Library</h1>
+                        <p class="text-gray-600">Browse and manage your generated images</p>
+                    </div>
+                    <div class="w-full md:w-auto back-btn-container">
+                        <a href="index.html" class="btn-primary flex items-center justify-center back-btn">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            <span>Back to Generator</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+                    <div class="flex items-center justify-center sm:justify-start">
+                        <span id="imageCount" class="font-medium text-gray-700">0 images found</span>
+                        <button id="clearAllBtn" class="ml-4 text-red-500 hover:text-red-700 text-sm flex items-center">
+                            <i class="fas fa-trash mr-1"></i> Clear All
+                        </button>
+                    </div>
+                    <div class="flex items-center w-full sm:w-auto">
+                        <input type="text" id="searchPrompt" placeholder="Search prompts..." class="w-full sm:w-auto border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="searchBtn" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="libraryGallery" class="image-grid flex-grow">
+                    <!-- Images will be added here dynamically -->
+                </div>
+                
+                <div id="emptyLibrary" class="text-center py-12 text-gray-500">
+                    <i class="fas fa-images text-5xl mb-4 opacity-30"></i>
+                    <p>Your library is empty</p>
+                    <p class="text-sm mt-2">Generate some images to see them here</p>
+                    <a href="index.html" class="mt-4 inline-block btn-primary">
+                        <i class="fas fa-magic mr-2"></i> Generate Images
+                    </a>
+                </div>
+                
+                <footer class="footer mt-8">
+                    <p>Designed by <a href="http://www.demohomex.com" target="_blank">www.demohomex.com</a> | Powered by FLUX AI</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image View Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Image Details</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-4 prompt-container">
+                <p id="modalPrompt" class="text-gray-700 mb-2 text-sm md:text-base pr-10"></p>
+                <button class="copy-btn" onclick="copyModalPrompt()">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <p id="modalDate" class="text-gray-500 text-xs md:text-sm"></p>
+            </div>
+            <div class="flex justify-center">
+                <img id="modalImage" class="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg" src="" alt="Preview">
+            </div>
+            <div class="mt-6 flex flex-wrap justify-center gap-3 download-buttons">
+                <button class="download-btn flex-1 mobile-btn" data-format="webp">
+                    <i class="fas fa-download mr-2"></i> WebP
+                </button>
+                <button class="download-btn flex-1 mobile-btn" data-format="jpeg">
+                    <i class="fas fa-download mr-2"></i> JPEG
+                </button>
+                <button class="download-btn flex-1 mobile-btn" data-format="png">
+                    <i class="fas fa-download mr-2"></i> PNG
+                </button>
+                <button id="deleteImageBtn" class="bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg px-4 py-2 transition-all flex items-center justify-center w-full mobile-btn mt-2">
+                    <i class="fas fa-trash-alt mr-2"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const libraryGallery = document.getElementById('libraryGallery');
+            const emptyLibrary = document.getElementById('emptyLibrary');
+            const imageCount = document.getElementById('imageCount');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const searchPrompt = document.getElementById('searchPrompt');
+            const searchBtn = document.getElementById('searchBtn');
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalPrompt = document.getElementById('modalPrompt');
+            const modalDate = document.getElementById('modalDate');
+            const closeModal = document.getElementById('closeModal');
+            const deleteImageBtn = document.getElementById('deleteImageBtn');
+            
+            // Current active image for modal operations
+            let currentImage = null;
+            
+            // Check if this is a mobile device
+            const isMobile = window.innerWidth < 768;
+            
+            // Load and display images from library
+            function loadLibrary(searchTerm = '') {
+                // Get images from local storage
+                const library = JSON.parse(localStorage.getItem('imageLibrary') || '[]');
+                
+                // Filter by search term if provided
+                const filteredLibrary = searchTerm 
+                    ? library.filter(item => item.prompt.toLowerCase().includes(searchTerm.toLowerCase()))
+                    : library;
+                
+                // Update image count
+                imageCount.textContent = `${filteredLibrary.length} image${filteredLibrary.length !== 1 ? 's' : ''} found`;
+                
+                // Clear existing gallery
+                libraryGallery.innerHTML = '';
+                
+                // Show empty state if no images
+                if (filteredLibrary.length === 0) {
+                    emptyLibrary.style.display = 'block';
+                    return;
+                }
+                
+                // Hide empty state
+                emptyLibrary.style.display = 'none';
+                
+                // Display images in reverse chronological order (newest first)
+                filteredLibrary.slice().reverse().forEach(item => {
+                    // Create image card
+                    const imgCard = document.createElement('div');
+                    imgCard.className = 'image-card';
+                    
+                    // Create image container
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'relative';
+                    
+                    // Create and set up image
+                    const img = document.createElement('img');
+                    img.src = `data:image/png;base64,${item.image}`;
+                    img.className = 'w-full h-40 sm:h-48 object-cover';
+                    img.alt = item.prompt.substring(0, 50);
+                    img.loading = 'lazy'; // Add lazy loading for better performance
+                    
+                    // Create image info section
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'p-2 sm:p-3 prompt-container';
+                    
+                    // Format date
+                    const date = new Date(item.date);
+                    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    
+                    // Add prompt and date with copy button
+                    infoDiv.innerHTML = `
+                        <p class="prompt-text pr-8">${item.prompt}</p>
+                        <button class="copy-btn" onclick="copyCardPrompt(event, '${item.id}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <p class="date-text mt-1">${formattedDate}</p>
+                    `;
+                    
+                    // Create action buttons container
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'image-actions';
+                    
+                    // View button
+                    const viewBtn = document.createElement('span');
+                    viewBtn.className = 'action-btn';
+                    viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                    viewBtn.title = 'View Image';
+                    viewBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openImageModal(item);
+                    });
+                    
+                    // Download button
+                    const downloadBtn = document.createElement('span');
+                    downloadBtn.className = 'action-btn';
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+                    downloadBtn.title = 'Download Image';
+                    downloadBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        downloadImage(item.image, 'png');
+                    });
+                    
+                    // Delete button
+                    const deleteBtn = document.createElement('span');
+                    deleteBtn.className = 'action-btn';
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteBtn.title = 'Delete Image';
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteImage(item.id);
+                    });
+                    
+                    // Add buttons to actions container
+                    actionsDiv.appendChild(viewBtn);
+                    actionsDiv.appendChild(downloadBtn);
+                    actionsDiv.appendChild(deleteBtn);
+                    
+                    // Add click event to whole card
+                    imgCard.addEventListener('click', () => {
+                        openImageModal(item);
+                    });
+                    
+                    // Assemble the card
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(actionsDiv);
+                    imgCard.appendChild(imgContainer);
+                    imgCard.appendChild(infoDiv);
+                    libraryGallery.appendChild(imgCard);
+                });
+            }
+            
+            // Open image modal
+            function openImageModal(item) {
+                currentImage = item;
+                modalImage.src = `data:image/png;base64,${item.image}`;
+                modalPrompt.textContent = item.prompt;
+                
+                // Format date
+                const date = new Date(item.date);
+                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                modalDate.textContent = `Generated on ${formattedDate}`;
+                
+                imageModal.style.display = 'flex';
+            }
+            
+            // Download image in specified format
+            function downloadImage(base64Data, format) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    let mimeType;
+                    let quality = 0.9;
+                    let fileName;
+                    
+                    switch(format) {
+                        case 'webp':
+                            mimeType = 'image/webp';
+                            fileName = 'library-image.webp';
+                            break;
+                        case 'jpeg':
+                            mimeType = 'image/jpeg';
+                            fileName = 'library-image.jpg';
+                            break;
+                        case 'png':
+                        default:
+                            mimeType = 'image/png';
+                            fileName = 'library-image.png';
+                            break;
+                    }
+                    
+                    const dataURL = canvas.toDataURL(mimeType, quality);
+                    
+                    // Handle download for mobile devices differently
+                    if (isMobile) {
+                        // For mobile devices, open the image in a new tab
+                        showToast('Image opening in a new tab...', 'info');
+                        window.open(dataURL, '_blank');
+                    } else {
+                        // For desktop, use traditional download
+                        const link = document.createElement('a');
+                        link.href = dataURL;
+                        link.download = fileName;
+                        link.click();
+                    }
+                };
+                
+                img.src = `data:image/png;base64,${base64Data}`;
+            }
+            
+            // Delete image from library
+            function deleteImage(id) {
+                // Get current library
+                const library = JSON.parse(localStorage.getItem('imageLibrary') || '[]');
+                
+                // Filter out the image to delete
+                const updatedLibrary = library.filter(item => item.id !== id);
+                
+                // Save back to localStorage
+                localStorage.setItem('imageLibrary', JSON.stringify(updatedLibrary));
+                
+                // Reload the library display
+                loadLibrary(searchPrompt.value);
+                
+                // Close modal if open
+                if (currentImage && currentImage.id === id) {
+                    imageModal.style.display = 'none';
+                }
+                
+                // Show toast notification
+                showToast('Image deleted successfully', 'success');
+            }
+            
+            // Delete image from modal
+            deleteImageBtn.addEventListener('click', () => {
+                if (currentImage) {
+                    deleteImage(currentImage.id);
+                }
+            });
+            
+            // Clear all images
+            clearAllBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete all images from your library?')) {
+                    localStorage.removeItem('imageLibrary');
+                    loadLibrary();
+                    showToast('All images deleted successfully', 'success');
+                }
+            });
+            
+            // Search functionality
+            searchBtn.addEventListener('click', () => {
+                loadLibrary(searchPrompt.value);
+            });
+            
+            // Also search on Enter key
+            searchPrompt.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    loadLibrary(searchPrompt.value);
+                }
+            });
+            
+            // Handle download button clicks in modal
+            document.querySelectorAll('.download-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentImage) {
+                        downloadImage(currentImage.image, btn.dataset.format);
+                    }
+                });
+            });
+            
+            // Close modal when clicking the close button
+            closeModal.addEventListener('click', () => {
+                imageModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside the content
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) {
+                    imageModal.style.display = 'none';
+                }
+            });
+            
+            // Show toast notification
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                let bgColor = 'bg-blue-500';
+                let icon = 'fa-info-circle';
+                
+                if (type === 'success') {
+                    bgColor = 'bg-green-500';
+                    icon = 'fa-check-circle';
+                } else if (type === 'error') {
+                    bgColor = 'bg-red-500';
+                    icon = 'fa-exclamation-circle';
+                }
+                
+                toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center`;
+                toast.innerHTML = `
+                    <i class="fas ${icon} mr-2"></i>
+                    <span>${message}</span>
+                    <button class="ml-4 hover:text-gray-200" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 5000);
+            }
+            
+            // Copy prompt from modal
+            window.copyModalPrompt = function() {
+                const prompt = document.getElementById('modalPrompt').textContent;
+                
+                // Create temporary textarea to copy text
+                const textarea = document.createElement('textarea');
+                textarea.value = prompt;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Show visual feedback
+                const copyBtn = document.querySelector('#imageModal .copy-btn');
+                const originalIcon = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalIcon;
+                }, 2000);
+                
+                // Show toast notification
+                showToast('Prompt copied to clipboard', 'success');
+            };
+            
+            // Initial load
+            loadLibrary();
+        });
+        
+        // Copy prompt from card
+        window.copyCardPrompt = function(event, id) {
+            event.stopPropagation(); // Prevent opening modal when clicking copy button
+            
+            // Find the prompt for this image id
+            const library = JSON.parse(localStorage.getItem('imageLibrary') || '[]');
+            const item = library.find(item => item.id === id);
+            
+            if (item) {
+                // Create temporary textarea to copy text
+                const textarea = document.createElement('textarea');
+                textarea.value = item.prompt;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Show toast notification
+                showToast('Prompt copied to clipboard', 'success');
+            }
+        };
+    </script>
+</body>
+</html>
